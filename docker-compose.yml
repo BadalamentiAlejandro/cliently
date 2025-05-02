@@ -1,0 +1,54 @@
+services:
+  # --- Servicio de Base de Datos PostgreSQL ---
+  db:
+    image: postgres:17
+    container_name: cliently_db
+    ports:
+      - "5433:5432"
+
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+    restart: unless-stopped
+
+
+  # --- Servicio de Aplicacion Backend Django ---
+  backend:
+    build:
+      context: ./cliently_backend # Contexto de construcción relativa al docker-compose.yml
+
+      dockerfile: ../Dockerfile # Relativa al contexto de construcción
+
+    container_name: cliently_backend
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+
+      ACCESS_TOKEN_LIFETIME_MINUTES: ${ACCESS_TOKEN_LIFETIME_MINUTES}
+      REFRESH_TOKEN_LIFETIME_DAYS: ${REFRESH_TOKEN_LIFETIME_DAYS}
+
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG}
+
+    depends_on:
+      - db
+      
+    restart: unless-stopped
+    
+volumes:
+  db_data:
