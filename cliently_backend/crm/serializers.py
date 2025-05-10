@@ -15,11 +15,9 @@ class ClientSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    client = serializers.PrimaryKeyRelatedField(read_only=True)
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Comment
         fields = ['id', 'client', 'user', 'text', 'date']
-        read_only_fields = ['id', 'date']
+        read_only_fields = ['id', 'date', 'client', 'user']
         extra_kwargs = {'text': {'required': True}}
